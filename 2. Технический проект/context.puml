@@ -17,7 +17,7 @@ technicalStaff ---> meteringSystem
 
 System_Ext(ioTDevices, "IoT-устройства", "Получение актуальных показаний счетчиков")
 System_Ext(notificationService, "Сервис уведомлений", "Отправка уведомлений пользователям")
-System_Ext(governmentServices, "API интеграция", "Интеграция с гос-ми сервисами (Госуслуги, ЕГРЮЛ)")
+System_Ext(governmentServices, "Единый портал госуслуг (ЕПГУ)", "Интеграция с гос-ми сервисами")
 
 meteringSystem ---> ioTDevices
 meteringSystem ---> notificationService
