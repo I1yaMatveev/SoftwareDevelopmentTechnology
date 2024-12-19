@@ -1,0 +1,29 @@
+@startuml C4_Context
+title "Диграмма контекста для системы учета энергопотребления"
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(homeowner, "Домовладелец", "Мониторинг и анализ потребления электроэнергии")
+Person(industrialFacilityAministrator, "Администраторы промышленных объектов", "Формирование отчетов о потреблении, оптимизация производственных процессов")
+Person(electricCompany, "Электрокомпания", "Анализ данных о потреблении, формирование тарифов, планирование мощностей")
+Person(technicalStaff, "Технический персонал", "Учет и обслуживание оборудования для мониторинга, решение технических проблем")
+
+System(meteringSystem, "Система учета энергопотребления", "Мониторинг, анализ и отчетность по потреблению электроэнергии")
+
+homeowner ---> meteringSystem
+industrialFacilityAministrator ---> meteringSystem
+electricCompany ---> meteringSystem
+technicalStaff ---> meteringSystem
+
+System_Ext(ioTDevices, "IoT-устройства", "Получение актуальных показаний счетчиков")
+System_Ext(notificationService, "Сервис уведомлений", "Отправка уведомлений пользователям")
+System_Ext(governmentServices, "API интеграция", "Интеграция с гос-ми сервисами (Госуслуги, ЕГРЮЛ)")
+
+meteringSystem ---> ioTDevices
+meteringSystem ---> notificationService
+meteringSystem ---> governmentServices
+
+
+SHOW_FLOATING_LEGEND()
+
+@enduml
