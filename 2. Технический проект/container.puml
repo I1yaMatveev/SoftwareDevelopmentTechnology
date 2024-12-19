@@ -1,16 +1,13 @@
 @startuml Диаграмма контейнеров
-title "C4. Контейнеры системы обмена валют"
+title "C4. Контейнеры. Система учета энергопотребления"
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
-
-' Персоны
 
 Person(homeowner, "Домовладелец", "Мониторинг и анализ потребления электроэнергии")
 Person(industrialFacilityAministrator, "Администраторы промышленных объектов", "Формирование отчетов о потреблении, оптимизация производственных процессов")
 Person(electricCompany, "Электрокомпания", "Анализ данных о потреблении, формирование тарифов, планирование мощностей")
 Person(technicalStaff, "Технический персонал", "Учет и обслуживание оборудования для мониторинга, решение технических проблем")
 
-' Система
 System_Boundary(appBoundary, "Система учета энергопотребления") {
     Container(webApp, "Веб-приложение", "React", "Интерфейс для пользователей системы учета энергопотребления")
     Container(apiGateway, "API Gateway", "", "Маршрутизация API запросов")
@@ -33,12 +30,10 @@ System_Boundary(appBoundary, "Система учета энергопотреб
     Container(messageBroker, "Событийная шина", "RabbitMQ")
 }
 
-' Внешние системы
 System_Ext(ioTDevices, "IoT-устройства", "Получение актуальных показаний счетчиков")
 System_Ext(govAPI, "Единый портал госуслуг (ЕПГУ)", "API Госуслуг")
 System_Ext(notificationServiceExt, "Email сервис", "Уведомление пользвателей о статусе заявок или превышении лимита")
 
-' Расположение элементов
 Rel(homeowner, webApp, "Использует", "HTTP/TCP")
 Rel(industrialFacilityAministrator, webApp, "Использует", "HTTP/TCP")
 Rel(electricCompany, webApp, "Использует", "HTTP/TCP")
