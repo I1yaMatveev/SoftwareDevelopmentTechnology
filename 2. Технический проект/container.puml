@@ -1,0 +1,78 @@
+@startuml Диаграмма контейнеров
+title "C4. Контейнеры системы обмена валют"
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+' Персоны
+
+Person(homeowner, "Домовладелец", "Мониторинг и анализ потребления электроэнергии")
+Person(industrialFacilityAministrator, "Администраторы промышленных объектов", "Формирование отчетов о потреблении, оптимизация производственных процессов")
+Person(electricCompany, "Электрокомпания", "Анализ данных о потреблении, формирование тарифов, планирование мощностей")
+Person(technicalStaff, "Технический персонал", "Учет и обслуживание оборудования для мониторинга, решение технических проблем")
+
+Person(admin, "Администратор", "Управление учетными записями пользователей и настройка системы")
+
+
+' Система
+System_Boundary(appBoundary, "Система учета энергопотребления") {
+    Container(webApp, "Веб-приложение", "React", "Интерфейс для пользователей системы учета энергопотребления")
+    Container(apiGateway, "API Gateway", "", "Маршрутизация API запросов")
+
+    Container(authenticationService, "Сервис аутентификации", "Java", "Управляет аутентификацией и авторизацией")
+    ContainerDb(authDB, "База данных пользователей", "PostgreSQL")
+
+    Container(energyDataCollector, "Сервис для сбора данных с IoT-устройств", "Java")
+    ContainerDb(energyDataCollectorDB, "База данных показателей с IoT-устройств", "PostgreSQL")
+
+    Container(reportService, "Сервис для формирования отчетов", "Java")
+    ContainerDb(reportDB, "База данных отчетов о потреблении", "PostgreSQL")
+
+    Container(govPortalIntegrationService, "Сервис интеграции с ЕПГУ", "Java")
+
+    Container(monitoringService, "Сервис мониторинга", "Prometheus", "Мониторинг состояния системы")
+
+    Container(notificationService, "Сервис уведомлений", "", "Отправка уведомлений пользователям")
+
+    Container(messageBroker, "Событийная шина", "RabbitMQ")
+}
+
+' Внешние системы
+System_Ext(ioTDevices, "IoT-устройства", "Получение актуальных показаний счетчиков")
+System_Ext(govAPI, "Единый портал госуслуг (ЕПГУ)", "API Госуслуг")
+System_Ext(notificationServiceExt, "Email сервис", "Уведомление пользвателей о статусе заявок или превышении лимита")
+
+' Расположение элементов
+Rel(homeowner, webApp, "Использует", "HTTP/TCP")
+Rel(industrialFacilityAministrator, webApp, "Использует", "HTTP/TCP")
+Rel(electricCompany, webApp, "Использует", "HTTP/TCP")
+Rel(technicalStaff, webApp, "Использует", "HTTP/TCP")
+Rel(admin, webApp, "Использует", "HTTP/TCP")
+
+Rel(monitoringService, apiGateway, "Мониторинг состояния системы", "TCP")
+
+Rel(webApp, apiGateway, "API вызовы", "HTTPS/REST")
+
+Rel(apiGateway, authenticationService, "API вызовы", "HTTPS/REST")
+Rel(apiGateway, energyDataCollector, "API вызовы", "HTTPS/REST")
+Rel(apiGateway, reportService, "API вызовы", "HTTPS/REST")
+Rel(apiGateway, govPortalIntegrationService, "API вызовы", "HTTPS/REST")
+Rel(apiGateway, notificationService, "API вызовы", "HTTPS/REST")
+
+Rel(authenticationService, authDB, "Чтение/Запись", "SQL")
+Rel(energyDataCollector, energyDataCollectorDB, "Чтение/Запись", "SQL")
+Rel(reportService, reportDB, "Чтение/Запись", "SQL")
+
+Rel(authenticationService, govPortalIntegrationService, "API вызовы", "HTTPS/REST")
+Rel(reportService, energyDataCollector, "API вызовы", "HTTPS/REST")
+
+Rel(govPortalIntegrationService, govAPI, "Получение данных собстенников помещений", "HTTPS/REST")
+Rel(energyDataCollector, ioTDevices, "Сбор данных с устройств", "TCP")
+Rel(notificationService, notificationServiceExt, "Отправка уведомлений", "HTTPS/REST")
+
+Rel(authenticationService, messageBroker, "Pub/sub", "AMQP")
+Rel(energyDataCollector, messageBroker, "Pub/sub", "AMQP")
+Rel(reportService, messageBroker, "Pub/sub", "AMQP")
+Rel(govPortalIntegrationService, messageBroker, "Pub/sub", "AMQP")
+Rel(notificationService, messageBroker, "Pub/sub", "AMQP")
+
+@enduml
