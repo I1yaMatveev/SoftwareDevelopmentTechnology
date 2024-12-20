@@ -14,15 +14,13 @@ System_Boundary(appBoundary, "Система учета энергопотреб
     Container(authenticationService, "Сервис аутентификации", "Java", "Управляет аутентификацией и авторизацией")
     ContainerDb(authDB, "База данных пользователей", "PostgreSQL")
 
-    Container(energyDataCollector, "Сервис для сбора данных с IoT-устройств", "Java")
+    Container(energyDataCollector, "Сервис для сбора и обработки данных с IoT-устройств", "Java")
     ContainerDb(energyDataCollectorDB, "База данных показателей с IoT-устройств", "PostgreSQL")
 
     Container(reportService, "Сервис для формирования отчетов", "Java")
     ContainerDb(reportDB, "База данных отчетов о потреблении", "PostgreSQL")
 
     Container(govPortalIntegrationService, "Сервис интеграции с ЕПГУ", "Java")
-
-    Container(monitoringService, "Сервис мониторинга", "Prometheus", "Мониторинг состояния системы")
 
     Container(notificationService, "Сервис уведомлений", "", "Отправка уведомлений пользователям")
 
@@ -37,8 +35,6 @@ Rel(homeowner, webApp, "Мониторинг энергопотребления"
 Rel(industrialFacilityAministrator, webApp, "Мониторинг энергопотребления", "HTTPS")
 Rel(electricCompany, webApp, "Мониторинг энергопотребления", "HTTPS")
 Rel(technicalStaff, webApp, "Мониторинг энергопотребления", "HTTPS")
-
-Rel(monitoringService, apiGateway, "Мониторинг состояния системы", "HTTPS")
 
 Rel(webApp, apiGateway, "API вызовы", "HTTPS/REST")
 

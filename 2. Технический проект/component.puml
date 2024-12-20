@@ -1,0 +1,38 @@
+@startuml Диаграмма компонентов
+title "C4_Компоненты. Система учета энергопотребления"
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component(webApp, "Веб-приложение", "React", "Интерфейс для пользователей системы учета энергопотребления")
+Component(apiGateway, "API Gateway", "", "Маршрутизация API запросов")
+Rel(webApp, apiGateway, "API вызовы", "HTTPS/REST")
+
+System_Boundary(energyDataCollectorBoundary, "Energy Data Collector Service") {
+
+    Component(energyDataCollectorController, "EnergyDataCollectorController", "Java", "API для обработки запросов")
+    Component(energyDataCollectorProcessor, "EnergyDataCollectorService", "Java", "Основная логика сбора и обработки данных")
+    Component(IoTDataReceiver, "IoTDataReceiver", "Java", "Получение данных от IoT-устройств")
+    Component(DataParser, "DataParser", "Java", "Разбор и проверка полученных данных")
+    Component(DataProcessor, "DataProcessor", "Java", "Агрегация, обработка и нормализация данных")
+    Component(DataRepository, "DataRepository", "Java", "Работа с базой данных показаний")
+}
+
+ComponentDb(EnergyDataCollectorDB, "EnergyDataCollectorDB", "PostgreSQL", "Хранение данных с IoT-устройств")
+Component_Ext(messageBroker, "EventBus", "RabbitMQ", "Маршрутизация сообщений между сервисами")
+System_Ext(ioTDevices, "IoT-устройства", "Получение актуальных показаний счетчиков")
+
+Rel(apiGateway, energyDataCollectorController, "Запросы на сбор данных")
+Rel(energyDataCollectorController, energyDataCollectorProcessor, "Обработка запросов")
+Rel(energyDataCollectorProcessor, DataProcessor, "Запрос данных")
+Rel(energyDataCollectorProcessor, DataRepository, "Сохранение обработанных данных")
+Rel(IoTDataReceiver, ioTDevices, "Сбор данных с устройств", "MQTT/HTTP")
+
+Rel(DataParser, IoTDataReceiver, "Получение сырых данных")
+Rel(DataProcessor, DataParser, "Получение валидных данных")
+Rel(DataRepository, EnergyDataCollectorDB, "SQL-запросы для чтения/записи данных")
+
+Rel(energyDataCollectorProcessor, messageBroker, "Публикация события сбора данных")
+
+SHOW_FLOATING_LEGEND()
+
+@enduml
