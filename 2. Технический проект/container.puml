@@ -1,6 +1,5 @@
 @startuml Диаграмма контейнеров
-title "C4. Контейнеры. Система учета энергопотребления"
-
+title "C4_Контейнеры. Система учета энергопотребления"
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 Person(homeowner, "Домовладелец", "Мониторинг и анализ потребления электроэнергии")
@@ -27,19 +26,19 @@ System_Boundary(appBoundary, "Система учета энергопотреб
 
     Container(notificationService, "Сервис уведомлений", "", "Отправка уведомлений пользователям")
 
-    Container(messageBroker, "Событийная шина", "RabbitMQ")
+    Container(messageBroker, "Событийная шина", "RabbitMQ", "Маршрутизация сообщений между сервисами")
 }
 
 System_Ext(ioTDevices, "IoT-устройства", "Получение актуальных показаний счетчиков")
 System_Ext(govAPI, "Единый портал госуслуг (ЕПГУ)", "API Госуслуг")
 System_Ext(notificationServiceExt, "Email сервис", "Уведомление пользвателей о статусе заявок или превышении лимита")
 
-Rel(homeowner, webApp, "Использует", "HTTP/TCP")
-Rel(industrialFacilityAministrator, webApp, "Использует", "HTTP/TCP")
-Rel(electricCompany, webApp, "Использует", "HTTP/TCP")
-Rel(technicalStaff, webApp, "Использует", "HTTP/TCP")
+Rel(homeowner, webApp, "Мониторинг энергопотребления", "HTTPS")
+Rel(industrialFacilityAministrator, webApp, "Мониторинг энергопотребления", "HTTPS")
+Rel(electricCompany, webApp, "Мониторинг энергопотребления", "HTTPS")
+Rel(technicalStaff, webApp, "Мониторинг энергопотребления", "HTTPS")
 
-Rel(monitoringService, apiGateway, "Мониторинг состояния системы", "TCP")
+Rel(monitoringService, apiGateway, "Мониторинг состояния системы", "HTTPS")
 
 Rel(webApp, apiGateway, "API вызовы", "HTTPS/REST")
 
@@ -49,15 +48,15 @@ Rel(apiGateway, reportService, "API вызовы", "HTTPS/REST")
 Rel(apiGateway, govPortalIntegrationService, "API вызовы", "HTTPS/REST")
 Rel(apiGateway, notificationService, "API вызовы", "HTTPS/REST")
 
-Rel(authenticationService, authDB, "Чтение/Запись", "SQL")
-Rel(energyDataCollector, energyDataCollectorDB, "Чтение/Запись", "SQL")
-Rel(reportService, reportDB, "Чтение/Запись", "SQL")
+Rel(authenticationService, authDB, "Чтение/Запись", "SQL/TCP")
+Rel(energyDataCollector, energyDataCollectorDB, "Чтение/Запись", "SQL/TCP")
+Rel(reportService, reportDB, "Чтение/Запись", "SQL/TCP")
 
 Rel(authenticationService, govPortalIntegrationService, "API вызовы", "HTTPS/REST")
 Rel(reportService, energyDataCollector, "API вызовы", "HTTPS/REST")
 
-Rel(govPortalIntegrationService, govAPI, "Получение данных собстенников помещений", "HTTPS/REST")
-Rel(energyDataCollector, ioTDevices, "Сбор данных с устройств", "TCP")
+Rel(govPortalIntegrationService, govAPI, "Получение данных пользователей", "HTTPS/REST")
+Rel(energyDataCollector, ioTDevices, "Сбор данных с устройств", "MQTT/HTTP")
 Rel(notificationService, notificationServiceExt, "Отправка уведомлений", "HTTPS/REST")
 
 Rel(authenticationService, messageBroker, "Pub/sub", "AMQP")
@@ -65,5 +64,7 @@ Rel(energyDataCollector, messageBroker, "Pub/sub", "AMQP")
 Rel(reportService, messageBroker, "Pub/sub", "AMQP")
 Rel(govPortalIntegrationService, messageBroker, "Pub/sub", "AMQP")
 Rel(notificationService, messageBroker, "Pub/sub", "AMQP")
+
+SHOW_FLOATING_LEGEND()
 
 @enduml

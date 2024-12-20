@@ -1,5 +1,5 @@
 @startuml C4_Context
-title "Диграмма контекста для системы учета энергопотребления"
+title "Диаграмма контекста для системы учета энергопотребления"
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
@@ -10,18 +10,18 @@ Person(technicalStaff, "Технический персонал", "Учет и �
 
 System(meteringSystem, "Система учета энергопотребления", "Мониторинг, анализ и отчетность по потреблению электроэнергии")
 
-homeowner ---> meteringSystem
-industrialFacilityAministrator ---> meteringSystem
-electricCompany ---> meteringSystem
-technicalStaff ---> meteringSystem
+Rel(homeowner, meteringSystem, "Мониторинг энергопотребления", "HTTPS")
+Rel(industrialFacilityAministrator, meteringSystem, "Мониторинг энергопотребления", "HTTPS")
+Rel(electricCompany, meteringSystem, "Мониторинг энергопотребления", "HTTPS")
+Rel(technicalStaff, meteringSystem, "Мониторинг энергопотребления", "HTTPS")
 
 System_Ext(ioTDevices, "IoT-устройства", "Получение актуальных показаний счетчиков")
 System_Ext(notificationService, "Сервис уведомлений", "Отправка уведомлений пользователям")
 System_Ext(governmentServices, "Единый портал госуслуг (ЕПГУ)", "Интеграция с гос-ми сервисами")
 
-meteringSystem ---> ioTDevices
-meteringSystem ---> notificationService
-meteringSystem ---> governmentServices
+Rel(meteringSystem, governmentServices, "Получение данных пользователей", "HTTPS/REST")
+Rel(meteringSystem, ioTDevices, "Сбор данных с устройств", "MQTT/HTTP")
+Rel(meteringSystem, notificationService, "Отправка уведомлений", "HTTPS/REST")
 
 
 SHOW_FLOATING_LEGEND()
