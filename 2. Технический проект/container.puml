@@ -31,35 +31,36 @@ System_Ext(ioTDevices, "IoT-устройства", "Получение акту�
 System_Ext(govAPI, "Единый портал госуслуг (ЕПГУ)", "API Госуслуг")
 System_Ext(notificationServiceExt, "Email сервис", "Уведомление пользвателей о статусе заявок или превышении лимита")
 
-Rel(homeowner, webApp, "Мониторинг энергопотребления", "HTTPS")
-Rel(industrialFacilityAministrator, webApp, "Мониторинг энергопотребления", "HTTPS")
-Rel(electricCompany, webApp, "Мониторинг энергопотребления", "HTTPS")
-Rel(technicalStaff, webApp, "Мониторинг энергопотребления", "HTTPS")
+homeowner --> webApp : "Мониторинг энергопотребления\n[HTTPS]"
+industrialFacilityAministrator --> webApp : "Мониторинг энергопотребления\n[HTTPS]"
+electricCompany --> webApp : "Мониторинг энергопотребления\n[HTTPS]"
+technicalStaff --> webApp : "Мониторинг энергопотребления\n[HTTPS]"
 
-Rel(webApp, apiGateway, "API вызовы", "HTTPS/REST")
+webApp --> apiGateway : "API вызовы\n[HTTPS/REST]"
 
-Rel(apiGateway, authenticationService, "API вызовы", "HTTPS/REST")
-Rel(apiGateway, energyDataCollector, "API вызовы", "HTTPS/REST")
-Rel(apiGateway, reportService, "API вызовы", "HTTPS/REST")
-Rel(apiGateway, govPortalIntegrationService, "API вызовы", "HTTPS/REST")
-Rel(apiGateway, notificationService, "API вызовы", "HTTPS/REST")
+apiGateway --> authenticationService : "API вызовы\n[HTTPS/REST]"
+apiGateway --> govPortalIntegrationService : "API вызовы\n[HTTPS/REST]"
+authenticationService -right-> govPortalIntegrationService : "API вызовы\n[HTTPS/REST]"
 
-Rel(authenticationService, authDB, "Чтение/Запись", "SQL/TCP")
-Rel(energyDataCollector, energyDataCollectorDB, "Чтение/Запись", "SQL/TCP")
-Rel(reportService, reportDB, "Чтение/Запись", "SQL/TCP")
+apiGateway --> reportService : "API вызовы\n[HTTPS/REST]"
+apiGateway --> energyDataCollector : "API вызовы\n[HTTPS/REST]"
+reportService -right-> energyDataCollector : "API вызовы\n[HTTPS/REST]"
 
-Rel(authenticationService, govPortalIntegrationService, "API вызовы", "HTTPS/REST")
-Rel(reportService, energyDataCollector, "API вызовы", "HTTPS/REST")
+apiGateway --> notificationService : "API вызовы\n[HTTPS/REST]"
 
-Rel(govPortalIntegrationService, govAPI, "Получение данных пользователей", "HTTPS/REST")
-Rel(energyDataCollector, ioTDevices, "Сбор данных с устройств", "MQTT/HTTP")
-Rel(notificationService, notificationServiceExt, "Отправка уведомлений", "HTTPS/REST")
+authenticationService --> authDB : "Чтение/Запись\n[SQL/TCP]"
+energyDataCollector --> energyDataCollectorDB : "Чтение/Запись\n[SQL/TCP]"
+reportService --> reportDB : "Чтение/Запись\n[SQL/TCP]"
 
-Rel(authenticationService, messageBroker, "Pub/sub", "AMQP")
-Rel(energyDataCollector, messageBroker, "Pub/sub", "AMQP")
-Rel(reportService, messageBroker, "Pub/sub", "AMQP")
-Rel(govPortalIntegrationService, messageBroker, "Pub/sub", "AMQP")
-Rel(notificationService, messageBroker, "Pub/sub", "AMQP")
+govPortalIntegrationService -left-> govAPI : "Получение данных пользователей\n[HTTPS/REST]"
+energyDataCollector --down--> ioTDevices : "Сбор данных с устройств\n[MQTT/HTTP]"
+notificationService -right-> notificationServiceExt : "Отправка уведомлений\n[HTTPS/REST]"
+
+authenticationService ----> messageBroker : "Pub/sub\n[AMQP]"
+govPortalIntegrationService ----> messageBroker : "Pub/sub\n[AMQP]"
+reportService ----> messageBroker : "Pub/sub\n[AMQP]"
+energyDataCollector ----> messageBroker : "Pub/sub\n[AMQP]"
+notificationService ----> messageBroker : "Pub/sub\n[AMQP]"
 
 SHOW_FLOATING_LEGEND()
 
