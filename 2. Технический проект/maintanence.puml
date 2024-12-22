@@ -1,0 +1,71 @@
+@startuml Диаграмма обслуживания
+
+package "Яндекс.Облако Kubernetes" as k8s {
+  [Docker] as docker
+  [Containers] as containers
+}
+
+package "Система учета энергопотребления - обслуживание" as maintenance {
+    actor "Системный администратор" as sys_admin
+    package "Яндекс.Облако" as cloud {
+      [Система мониторинга Prometheus] as monitoring_service
+      [Система бэкапов Velero] as backup_service
+      [Управление секретами (Kubernetes Secrets)] as secrets
+    }
+}
+
+package "Внешние сервисы" as outer_services {
+    package "Канал уведомлений" as notifications {
+        [Alertmanager] as alertmanager
+        [Почтовый шлюз] as email_service
+    }
+}
+
+package "Разработка" as development {
+    actor "Разработчик" as developer
+    [Система контроля версий (Git GitLab)] as vcs
+    [CI/CD GitLab (Ветка main)] as cicd
+    [CI/CD GitLab (Ветка dev)] as cicdtest
+    
+    package "CI/CD Pipeline (PROD)" as build {
+      [Build Stage (PROD)] as buildstage
+      [Testing Stage (PROD)] as testingstage
+      [Deployment Stage (PROD)] as deploymentstage
+    }
+
+    package "CI/CD Pipeline (TEST)" as buildtest {
+      [Build Stage (Test)] as buildstagetest
+      [Testing Stage (Test)] as testingstagetest
+      [Deployment Stage (Test)] as testdeploymentstage
+    }
+
+    [Реестр контейнеров GitLab] as containeregistry
+}
+
+sys_admin --> monitoring_service : "Мониторинг состояния системы"
+sys_admin --> backup_service : "Контроль и восстановление данных"
+monitoring_service --> alertmanager : "Триггеры алертов"
+alertmanager --> email_service : "Уведомления"
+developer --> vcs : "PUSH коммитов"
+vcs --> cicd : "CI/CD для PROD"
+vcs --> cicdtest : "CI/CD для dev"
+cicd --> buildstage : "Запуск pipeline"
+cicdtest --> buildstagetest : "Запуск pipeline"
+buildstage --> containeregistry : "Сборка Docker-образов\nи PUSH"
+buildstagetest --> containeregistry : "Сборка Docker-образови\nи PUSH"
+testingstage --> containeregistry : "PULL Docker-образов"
+testingstagetest --> containeregistry : "PULL Docker-образов"
+buildstage --down--> testingstage : "PASS"
+buildstagetest --down--> testingstagetest : "PASS"
+testingstage --down--> deploymentstage : "Deployment в Production"
+testingstagetest --down--> testdeploymentstage : "Deployment в Test"
+deploymentstage --> docker : "PULL обновлений [SSH] (Тэг main)"
+testdeploymentstage --> docker : "PULL обновлений [SSH] (Тэг dev)"
+docker --up--> containeregistry : "PULL Docker-образов"
+docker --> containers : "Обновление и развёртка контейнеров"
+monitoring_service --> containers : "Проверка состояния"
+backup_service --> k8s : "Создание и восстановление бэкапов"
+backup_service --> containers : "Сохранение данных"
+secrets --> containers : "Управление доступом"
+
+@enduml

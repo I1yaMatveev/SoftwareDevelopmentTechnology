@@ -1,0 +1,63 @@
+@startuml Диаграмма инфраструктуры
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title "C4_Infrastructure. Система учета энергопотребления"
+
+package "Облачная платформа" as cloud {
+    Container(nginx, "Nginx", "Nginx", "Обратный прокси и балансировщик нагрузки")
+
+    package "Kubernetes Cluster" as k8s_cluster {
+        package "Authentication Pod" as authentication_pod {
+            Container(auth_service, "Сервис аутентификации", "Java, Spring Boot", "Управление аутентификацией и авторизацией")
+        }
+
+        package "Report Service Pod" as report_service_pod {
+            Container(report_service, "Сервис отчетов", "Java, Spring Boot", "Формирование отчетов о потреблении")
+        }
+
+        package "Energy Data Collector Pod" as data_collector_pod {
+            Container(data_collector_service, "Сервис сбора данных", "Java, Spring Boot", "Обработка данных с IoT-устройств")
+        }
+
+        package "Goverment Service Integration Pod" as gov_integration_pod {
+            Container(gov_service, "Сервис интеграции с ЕПГУ", "Java, Spring Boot", "Интеграция с порталом госуслуг")
+        }
+
+        package "Notification Pod" as notification_pod {
+            Container(notification_service, "Сервис уведомлений", "Spring Boot", "Отправка уведомлений пользователям")
+        }
+    }
+
+    Container(RabbitMQ, "Message Broker", "RabbitMQ", "Асинхронная обработка событий")
+}
+
+package "Database Cluster" as db_cluster {
+    package "Region 1" as region1 {
+        Container(db_r1_master, "PostgreSQL Master", "PostgreSQL", "Основная база данных для региона 1")
+        Container(db_r1_replica, "PostgreSQL Replica", "PostgreSQL", "Реплика базы данных для региона 1")
+    }
+
+    package "Region n" as regionn {
+        Container(db_rn_master, "PostgreSQL Master", "PostgreSQL", "Основная база данных для региона n")
+        Container(db_rn_replica, "PostgreSQL Replica", "PostgreSQL", "Реплика базы данных для региона n")
+    }
+}
+
+System_Ext(ioTDevices, "IoT-устройства", "Счетчики и устройства сбора данных")
+System_Ext(gov_api, "Единый портал госуслуг (ЕПГУ)", "API Госуслуг")
+System_Ext(notification_service_ext, "Email сервис", "Уведомления для пользователей")
+
+nginx --> k8s_cluster : "Проксирование запросов\n[HTTP]"
+k8s_cluster ----> db_cluster : "Чтение/Запись данных\n[SQL/TCP]"
+k8s_cluster --> RabbitMQ : "Pub/sub\n[AMQP]"
+
+db_r1_master --> db_r1_replica : "Репликация\n[Streaming]"
+db_rn_master --> db_rn_replica : "Репликация\n[Streaming]"
+
+data_collector_service ----> ioTDevices : "Сбор данных\n[MQTT/HTTP]"
+gov_service ----> gov_api : "Запросы к ЕПГУ\n[HTTPS/REST]"
+notification_service ----> notification_service_ext : "Отправка уведомлений\n[HTTPS/REST]"
+
+SHOW_FLOATING_LEGEND()
+
+@enduml
